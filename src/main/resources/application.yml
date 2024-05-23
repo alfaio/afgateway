@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: afgateway
+
+server:
+  port: 8888
+
+afregistry:
+  servers: http://localhost:8484

@@ -1,0 +1,15 @@
+### GET hello
+GET http://localhost:8888/hello
+
+### GET gw
+GET http://localhost:8888/gw
+
+### post user
+POST http://localhost:8888/gw/io.github.alfaio.afrpc.demo.api.UserService
+Content-Type: application/json
+
+{
+  "service":"io.github.alfaio.afrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
