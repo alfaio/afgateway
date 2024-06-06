@@ -1,4 +1,4 @@
-package io.github.alfaio.gateway.handler;
+package io.github.alfaio.gateway.web.handler;
 
 import io.github.alfaio.gateway.plugin.DefaultGatewayPluginChain;
 import io.github.alfaio.gateway.plugin.GatewayPlugin;
