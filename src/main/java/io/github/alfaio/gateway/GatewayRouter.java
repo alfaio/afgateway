@@ -15,20 +15,26 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
  **/
 @Component
 public class GatewayRouter {
+//
+//    @Autowired
+//    HelloHandler helloHandler;
+//    @Autowired
+//    GatewayHandler gatewayHandler;
+//    @Autowired
+//    GatewayWebHandler gatewayWebHandler;
+//
+//    @Bean
+//    public RouterFunction<?> userRouterFunction() {
+//        return route(GET("/hello"), helloHandler::handle);
+//    }
+//
+//    @Bean
+//    public RouterFunction<?> gwRouterFunction() {
+//        return route(GET("/gw").or(POST("/gw/**")), gatewayHandler::handle);
+//    }
 
-    @Autowired
-    HelloHandler helloHandler;
-    @Autowired
-    GatewayHandler gatewayHandler;
-
-    @Bean
-    public RouterFunction<?> userRouterFunction() {
-        return route(GET("/hello"), helloHandler::handle);
-    }
-
-    @Bean
-    public RouterFunction<?> gwRouterFunction() {
-        return route(GET("/gw").or(POST("/gw/**")), gatewayHandler::handle);
-    }
-
+//    @Bean
+//    public RouterFunction<?> gwWebRouterFunction() {
+//        return route(GET("/ge").or(POST("/ge/**")), gatewayWebHandler::handle);
+//    }
 }
