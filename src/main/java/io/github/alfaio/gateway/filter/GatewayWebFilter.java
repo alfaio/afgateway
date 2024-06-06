@@ -1,4 +1,4 @@
-package io.github.alfaio.gateway;
+package io.github.alfaio.gateway.filter;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;

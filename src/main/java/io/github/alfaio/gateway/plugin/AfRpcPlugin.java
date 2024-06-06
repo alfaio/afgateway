@@ -1,37 +1,39 @@
-package io.github.alfaio.gateway;
+package io.github.alfaio.gateway.plugin;
 
 import io.github.alfaio.afrpc.core.api.LoadBalancer;
 import io.github.alfaio.afrpc.core.api.RegistryCenter;
 import io.github.alfaio.afrpc.core.cluster.RoundRibonLoadBalancer;
 import io.github.alfaio.afrpc.core.meta.InstanceMeta;
 import io.github.alfaio.afrpc.core.meta.ServiceMeta;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 /**
  * @author LinMF
- * @since 2024/5/23
+ * @since 2024/6/6
  **/
-@Component
-public class GatewayHandler {
-
+@Component("afrpc")
+public class AfRpcPlugin extends  AbstractGatewayPlugin{
+    public static final String NAME = "afrpc";
+    private final String prefix = GATEWAY_PREFIX + "/" + NAME + "/";
 
     @Autowired
     RegistryCenter rc;
-
     LoadBalancer<InstanceMeta> loadBalancer = new RoundRibonLoadBalancer<>();
 
-    Mono<ServerResponse> handle(ServerRequest request) {
+    @Override
+    public Mono<Void> doHandle(ServerWebExchange exchange) {
+        System.out.println(" ===>>> [AfrpcPlugin] ...");
         // 1. 通过请求路径获取服务名
-        String service = request.path().substring(4);
+        String service = exchange.getRequest().getPath().value().substring(prefix.length());
         ServiceMeta serviceMeta = ServiceMeta.builder().name(service)
                 .app("app1").env("dev").namespace("public").build();
         // 2. 通过rc拿到所有服务实例
@@ -40,24 +42,28 @@ public class GatewayHandler {
         InstanceMeta instanceMeta = loadBalancer.choose(instanceMetas);
         String url = instanceMeta.toUrl();
         // 4. 拿到请求报文
-        Mono<String> requestMono = request.bodyToMono(String.class);
-        return requestMono.flatMap(x -> invokeFromRegistry(x, url));
+        Flux<DataBuffer> requestBody = exchange.getRequest().getBody();
 
-    }
-
-    @NotNull
-    private static Mono<ServerResponse> invokeFromRegistry(String x, String url) {
         // 5. 通过webclient发送post请求
         WebClient client = WebClient.create(url);
         Mono<ResponseEntity<String>> entity = client.post().header("Content-Type", "application/json")
-                .bodyValue(x).retrieve().toEntity(String.class);
+                .body(requestBody, DataBuffer.class).retrieve().toEntity(String.class);
         // 6.通过entity获取响应报文
-        Mono<String> body = entity.map(ResponseEntity::getBody);
-        body.subscribe(source -> System.out.println("Response: " + source));
+        Mono<String> responseBody = entity.map(ResponseEntity::getBody);
         // 7. 组装响应报文
-        return ServerResponse.ok()
-                .header("Content-Type", "application/json")
-                .header("af.gw.version", "v1.0.0")
-                .body(body, String.class);
+        exchange.getResponse().getHeaders().add("Content-Type", "application/json");
+        exchange.getResponse().getHeaders().add("af.gw.version", "v1.0.0");
+        return responseBody.flatMap(s -> exchange.getResponse()
+                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(s.getBytes()))));
+    }
+
+    @Override
+    public boolean support(ServerWebExchange exchange) {
+        return exchange.getRequest().getPath().value().startsWith(prefix);
+    }
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 }

@@ -1,4 +1,4 @@
-package io.github.alfaio.gateway;
+package io.github.alfaio.gateway.config;
 
 import io.github.alfaio.afrpc.core.api.RegistryCenter;
 import io.github.alfaio.afrpc.core.registry.af.AfRegistryCenter;
@@ -28,7 +28,7 @@ public class GatewayConfig {
         return args -> {
             SimpleUrlHandlerMapping handlerMapping = context.getBean(SimpleUrlHandlerMapping.class);
             Properties mappings = new Properties();
-            mappings.put("/ga/*", "gatewayWebHandler");
+            mappings.put("/gw/**", "gatewayWebHandler");
             handlerMapping.setMappings(mappings);
             handlerMapping.initApplicationContext();
             System.out.println("af gateway start");

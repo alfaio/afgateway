@@ -14,5 +14,25 @@ Content-Type: application/json
   "args":[100]
 }
 
-### GET ga
-GET http://localhost:8888/ga/ww
+### GET gw
+GET http://localhost:8888/gw/afrpc/
+
+### POST DirectPlugin
+POST http://localhost:8888/gw/direct/io.github.alfaio.afrpc.demo.api.UserService?backend=http://localhost:8081/afrpc
+Content-Type: application/json
+
+{
+  "service":"io.github.alfaio.afrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
+
+### POST AfrpcPlugin
+POST http://localhost:8888/gw/afrpc/io.github.alfaio.afrpc.demo.api.UserService?backend=1
+Content-Type: application/json
+
+{
+  "service":"io.github.alfaio.afrpc.demo.api.UserService",
+  "methodSign":"findById@1_int",
+  "args":[100]
+}
