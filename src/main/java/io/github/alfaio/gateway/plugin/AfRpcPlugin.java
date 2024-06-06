@@ -30,7 +30,7 @@ public class AfRpcPlugin extends  AbstractGatewayPlugin{
     LoadBalancer<InstanceMeta> loadBalancer = new RoundRibonLoadBalancer<>();
 
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         System.out.println(" ===>>> [AfrpcPlugin] ...");
         // 1. 通过请求路径获取服务名
         String service = exchange.getRequest().getPath().value().substring(prefix.length());
@@ -54,7 +54,8 @@ public class AfRpcPlugin extends  AbstractGatewayPlugin{
         exchange.getResponse().getHeaders().add("Content-Type", "application/json");
         exchange.getResponse().getHeaders().add("af.gw.version", "v1.0.0");
         return responseBody.flatMap(s -> exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(s.getBytes()))));
+                        .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(s.getBytes()))))
+                .then(chain.handle(exchange));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.github.alfaio.gateway.handler;
 
+import io.github.alfaio.gateway.plugin.DefaultGatewayPluginChain;
 import io.github.alfaio.gateway.plugin.GatewayPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,15 +30,7 @@ public class GatewayWebHandler implements WebHandler {
             return exchange.getResponse()
                     .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
         }
-        for (GatewayPlugin plugin : plugins) {
-            if (plugin.support(exchange)) {
-                return plugin.handler(exchange);
-            }
-        }
-        String mock = """
-                {"result":"no supported plugin"}
-                """;
-        return exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
+
+        return new DefaultGatewayPluginChain(plugins).handle(exchange);
     }
 }

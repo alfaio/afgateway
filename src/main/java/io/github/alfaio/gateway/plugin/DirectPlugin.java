@@ -20,7 +20,7 @@ public class DirectPlugin extends AbstractGatewayPlugin {
     public static final String NAME = "direct";
     private final String prefix = GATEWAY_PREFIX + "/" + NAME + "/";
     @Override
-    public Mono<Void> doHandle(ServerWebExchange exchange) {
+    public Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain) {
         System.out.println(" ===>>> [DirectPlugin] ...");
         String backend = exchange.getRequest().getQueryParams().getFirst("backend");
         Flux<DataBuffer> requestBody = exchange.getRequest().getBody();
@@ -29,8 +29,8 @@ public class DirectPlugin extends AbstractGatewayPlugin {
         exchange.getResponse().getHeaders().add("af.gw.version", "v1.0.0");
 
         if (backend == null || backend.isEmpty()) {
-            return requestBody.flatMap(x -> exchange.getResponse().writeWith(Mono.just(x)).then()).then();
-
+            return requestBody.flatMap(x -> exchange.getResponse().writeWith(Mono.just(x)))
+                    .then(chain.handle(exchange));
         }
 
         // 5. 通过webclient发送post请求
@@ -41,7 +41,8 @@ public class DirectPlugin extends AbstractGatewayPlugin {
         Mono<String> responseBody = entity.map(ResponseEntity::getBody);
         // 7. 组装响应报文
         return responseBody.flatMap(s -> exchange.getResponse()
-                .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(s.getBytes()))));
+                        .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(s.getBytes()))))
+                .then(chain.handle(exchange));
 
     }
 

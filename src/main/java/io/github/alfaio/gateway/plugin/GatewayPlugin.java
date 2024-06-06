@@ -18,6 +18,6 @@ public interface GatewayPlugin {
 
     boolean support(ServerWebExchange exchange);
 
-    Mono<Void> handler(ServerWebExchange exchange);
+    Mono<Void> handler(ServerWebExchange exchange, GatewayPluginChain chain);
 
 }

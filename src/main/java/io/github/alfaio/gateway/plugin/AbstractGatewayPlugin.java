@@ -17,12 +17,12 @@ public abstract class AbstractGatewayPlugin implements GatewayPlugin {
 
 
     @Override
-    public Mono<Void> handler(ServerWebExchange exchange) {
+    public Mono<Void> handler(ServerWebExchange exchange, GatewayPluginChain chain) {
         boolean support = support(exchange);
         System.out.println(" ===>>> plugin [" + this.getName() + "], support = " + support);
-        return support ? doHandle(exchange) : Mono.empty();
+        return support ? doHandle(exchange, chain) : chain.handle(exchange);
     }
 
-    public abstract Mono<Void> doHandle(ServerWebExchange exchange);
+    public abstract Mono<Void> doHandle(ServerWebExchange exchange, GatewayPluginChain chain);
 
 }
