@@ -10,12 +10,13 @@ import reactor.core.publisher.Mono;
  **/
 @Component("demoFilter")
 public class DemoFilter implements GatewayFilter {
+
     @Override
-    public Mono<Void> handler(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         System.out.println(" ===>>> filters: demo filter ...");
         exchange.getRequest().getHeaders().forEach((k, v) -> {
             System.out.println(k + ":" + v);
         });
-        return Mono.empty();
+        return chain.filter(exchange);
     }
 }

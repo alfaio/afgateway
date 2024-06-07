@@ -1,5 +1,7 @@
 package io.github.alfaio.gateway.web.handler;
 
+import io.github.alfaio.gateway.filter.DefaultGatewayFilterChain;
+import io.github.alfaio.gateway.filter.GatewayFilter;
 import io.github.alfaio.gateway.plugin.DefaultGatewayPluginChain;
 import io.github.alfaio.gateway.plugin.GatewayPlugin;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ public class GatewayWebHandler implements WebHandler {
 
     @Autowired
     List<GatewayPlugin> plugins;
+    @Autowired
+    List<GatewayFilter> filters;
 
     @Override
     public Mono<Void> handle(ServerWebExchange exchange) {
@@ -30,7 +34,7 @@ public class GatewayWebHandler implements WebHandler {
             return exchange.getResponse()
                     .writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(mock.getBytes())));
         }
-
+        new DefaultGatewayFilterChain(filters).filter(exchange);
         return new DefaultGatewayPluginChain(plugins).handle(exchange);
     }
 }
